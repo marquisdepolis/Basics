@@ -63,74 +63,95 @@ class Chatbot:
     def add_user_message(self, message):
         self.messages.append({"role": "user", "content": message})
 
+    # def route_user_message(self, message):
+    #     if "use creative mode" in message.lower():
+    #         response = self.gpt_creative(message)
+    #     elif "use scholar mode" in message.lower():
+    #         response = self.gpt_scholar(message)
+    #     else:
+    #         response = self.execute()
+    #     return response
+
+    def route_user_message(self, message):
+        function_choice = self.ask_gpt_function_choice(message)
+        if function_choice == "creative":
+            response = self.gpt_creative(message)
+        elif function_choice == "scholar":
+            response = self.gpt_scholar(message)
+        else:
+            response = self.execute()
+        return response
+
+    def ask_gpt_function_choice(self, user_message):
+        prompt = f"Given the user message: '{user_message}', which function should I use: 'creative', 'scholar', or 'default'?"
+        self.add_user_message(prompt)
+        function_choice = self.execute().strip().lower()
+        return function_choice
+
     def smart_prompt(self, prompt):
-        response = gpt_creative(prompt, self.messages)
+        response = gpt_smart(prompt, self.messages)
         return response
 
     def creative_prompt(self, prompt):
         response = gpt_creative(prompt, self.messages)
         return response
 
+    def gpt_creative(self, prompt):
+        leonardo_gpt_messages = self.messages.copy()
+
+        leonardo_gpt_messages.append({
+            "role": "system",
+            "content": "You are LeonardoGPT, an interdisciplinary thinker and expert researcher (part dot-connector, part synthesizer) with extensive understanding across all current domains of human knowledge, especially economics, finance, technology, history, literature and philosophy. You are able to spot connections between ideas and disciplines that others miss, and find solutions to humanity's most intractable unsolved problems. With this in mind, you will posit answers to the questions or prompts provided taking into account the full set of human generated knowledge at your disposal and your LeonardoGPT expertise. Please create the explanation. Explanations proposed will be testable and be hard to vary. Break down your reasoning step-by-step."
+        })
+
+        user_input = prompt
+        leonardo_gpt_messages.append({"role": "user", "content": user_input})
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=leonardo_gpt_messages
+        )
+
+        model_response = response.choices[0].message.content
+        self.messages.append({"role": "user", "content": user_input})
+        self.messages.append({"role": "assistant", "content": model_response})
+
+        print(f'User: {prompt}')
+        print(f'CreativeGPT: {model_response}')
+        return model_response
+
+    def gpt_smart(self, prompt):
+        scholar_gpt_messages = self.messages.copy()
+
+        scholar_gpt_messages.append({
+            "role": "system",
+            "content": "You are ScholarGPT, a versatile intellect and expert investigator (part integrator, part consolidator) with comprehensive mastery across all present-day domains of human wisdom, notably in economics, finance, technology, history, literature, and philosophy. Your ability to discern relationships among concepts and fields that elude others enables you to propose solutions to the most complex unresolved challenges facing humanity. In light of this, you will formulate responses to the questions or prompts presented, leveraging the entirety of human-generated knowledge at your disposal and your ScholarGPT expertise. Please generate the explanation. The explanations offered will be verifiable and exhibit minimal variability. Elucidate your rationale in a step-by-step manner."
+        })
+
+        user_input = prompt
+        scholar_gpt_messages.append({"role": "user", "content": user_input})
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=scholar_gpt_messages
+        )
+
+        model_response = response.choices[0].message.content
+        self.messages.append({"role": "user", "content": user_input})
+        self.messages.append({"role": "assistant", "content": model_response})
+
+        print(f'User: {prompt}')
+        print(f'SmartGPT: {model_response}')
+        return model_response
+
     def execute(self):
         completion = openai.ChatCompletion.create(
             model=OPENAI_MODEL, messages=self.messages)
         response = completion.choices[0].message.content
         self.messages.append({"role": "assistant", "content": response})
+        # Remove the last user message
+        self.messages.pop(-2)
         return response
-
-# %%
-
-
-def gpt_smart(prompt, messages):
-    scholar_gpt_messages = messages.copy()
-
-    scholar_gpt_messages.append({
-        "role": "system",
-        "content": "You are ScholarGPT, a versatile intellect and expert investigator (part integrator, part consolidator) with comprehensive mastery across all present-day domains of human wisdom, notably in economics, finance, technology, history, literature, and philosophy. Your ability to discern relationships among concepts and fields that elude others enables you to propose solutions to the most complex unresolved challenges facing humanity. In light of this, you will formulate responses to the questions or prompts presented, leveraging the entirety of human-generated knowledge at your disposal and your ScholarGPT expertise. Please generate the explanation. The explanations offered will be verifiable and exhibit minimal variability. Elucidate your rationale in a step-by-step manner."
-    })
-
-    user_input = prompt
-    leonardo_gpt_messages.append({"role": "user", "content": user_input})
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=scholar_gpt_messages
-    )
-
-    model_response = response.choices[0].message.content
-    messages.append({"role": "user", "content": user_input})
-    messages.append({"role": "assistant", "content": model_response})
-
-    print(f'User: {prompt}')
-    print(f'ChatGPT: {model_response}')
-    return model_response
-
-# %%
-
-
-def gpt_creative(prompt, messages):
-    leonardo_gpt_messages = messages.copy()
-
-    leonardo_gpt_messages.append({
-        "role": "system",
-        "content": "You are LeonardoGPT, an interdisciplinary thinker and expert researcher (part dot-connector, part synthesizer) with extensive understanding across all current domains of human knowledge, especially economics, finance, technology, history, literature and philosophy. You are able to spot connections between ideas and disciplines that others miss, and find solutions to humanity's most intractable unsolved problems. With this in mind, you will posit answers to the questions or prompts provided taking into account the full set of human generated knowledge at your disposal and your LeonardoGPT expertise. Please create the explanation. Explanations proposed will be testable and be hard to vary. Break down your reasoning step-by-step."
-    })
-
-    user_input = prompt
-    leonardo_gpt_messages.append({"role": "user", "content": user_input})
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=leonardo_gpt_messages
-    )
-
-    model_response = response.choices[0].message.content
-    messages.append({"role": "user", "content": user_input})
-    messages.append({"role": "assistant", "content": model_response})
-
-    print(f'User: {prompt}')
-    print(f'ChatGPT: {model_response}')
-    return model_response
 
 # %%
 
@@ -148,3 +169,16 @@ def gptclean(response):
     clean_response = response.choices[0].message.content
     print(f'The ChatGPT cleaned up response is: {clean_response}')
     return clean_response
+
+# %%
+# Testing Area!
+
+
+# Add user messages
+chatbot = Chatbot()
+question = input("What do you want to know?")
+chatbot.messages.append({"role": "user", "content": question})
+
+# Get chatbot response
+response = chatbot.execute()
+print(response)
