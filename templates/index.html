@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div id="chatbox">
+        <p>ChatGPT: What do you want to know?</p>
+    </div>
+    <form id="message-form">
+        <input type="text" id="user_message" autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('message-form');
+        const chatbox = document.getElementById('chatbox');
+        const userMessageInput = document.getElementById('user_message');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const userMessage = userMessageInput.value;
+            userMessageInput.value = '';
+
+            const userMessageElement = document.createElement('p');
+            userMessageElement.textContent = 'You: ' + userMessage;
+            chatbox.appendChild(userMessageElement);
+
+            const formData = new FormData();
+            formData.append('user_message', userMessage);
+
+            fetch('/message', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const assistantMessageElement = document.createElement('p');
+                assistantMessageElement.textContent = 'ChatGPT: ' + data.response;
+                chatbox.appendChild(assistantMessageElement);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
+static/styles.css:
+
+<!--/* Optional, for basic styling */-->
+<!--body {-->
+<!--    font-family: Arial, sans-serif;-->
+<!--    margin: 0;-->
+<!--    padding: 0;-->
+<!--}-->
+<!---->
+<!--#chatbox {-->
+<!--    width: 100%;-->
+<!--    max-width: 600px;-->
+<!--    height: 400px;-->
+<!--    margin: 20px auto;-->
+<!--    padding: 10px;-->
+<!--    background-color: #f1f1f1;-->
+<!--    border: 1px solid #ccc;-->
+<!--    overflow-y: auto;-->
+<!--}-->
+<!---->
+<!--#message-form {-->
+<!--    display: flex;-->
+<!--    justify-content: center;-->
+<!--    align-items: center;-->
+<!--    gap: 10px;-->
+<!--    width: 100%;-->
+<!--    max-width: 600px;-->
+<!--    margin: 0 auto;-->
+<!--}-->
+<!---->
+<!--#user_message {-->
+<!--    flex-grow: 1;-->
+<!--}-->
