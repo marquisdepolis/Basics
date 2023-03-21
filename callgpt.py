@@ -63,15 +63,6 @@ class Chatbot:
     def add_user_message(self, message):
         self.messages.append({"role": "user", "content": message})
 
-    # def route_user_message(self, message):
-    #     if "use creative mode" in message.lower():
-    #         response = self.gpt_creative(message)
-    #     elif "use scholar mode" in message.lower():
-    #         response = self.gpt_scholar(message)
-    #     else:
-    #         response = self.execute()
-    #     return response
-
     def route_user_message(self, message):
         function_choice = self.ask_gpt_function_choice(message)
         if function_choice == "creative":
@@ -89,11 +80,11 @@ class Chatbot:
         return function_choice
 
     def smart_prompt(self, prompt):
-        response = gpt_smart(prompt, self.messages)
+        response = self.gpt_smart(prompt, self.messages)
         return response
 
     def creative_prompt(self, prompt):
-        response = gpt_creative(prompt, self.messages)
+        response = self.gpt_creative(prompt, self.messages)
         return response
 
     def gpt_creative(self, prompt):
@@ -143,7 +134,7 @@ class Chatbot:
         print(f'User: {prompt}')
         print(f'SmartGPT: {model_response}')
         return model_response
-        
+
 #    def handle_message(self, user_message):
 #        self.messages.append(user_message)
 #        # Replace the following line with your GPT-4 API call to generate a response
@@ -181,11 +172,11 @@ def gptclean(response):
 # Testing Area!
 
 #
-## Add user messages
-#chatbot = Chatbot()
-#question = input("What do you want to know?")
-#chatbot.messages.append({"role": "user", "content": question})
+# Add user messages
+# chatbot = Chatbot()
+# question = input("What do you want to know?")
+# chatbot.messages.append({"role": "user", "content": question})
 #
-## Get chatbot response
-#response = chatbot.execute()
-#print(response)
+# Get chatbot response
+# response = chatbot.execute()
+# print(response)
