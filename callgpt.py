@@ -80,11 +80,11 @@ class Chatbot:
         return function_choice
 
     def smart_prompt(self, prompt):
-        response = self.gpt_smart(prompt, self.messages)
+        response = self.gpt_smart(prompt)
         return response
 
     def creative_prompt(self, prompt):
-        response = self.gpt_creative(prompt, self.messages)
+        response = self.gpt_creative(prompt)
         return response
 
     def gpt_creative(self, prompt):
